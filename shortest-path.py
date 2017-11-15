@@ -3,7 +3,7 @@
 
 # ## Shortest Path Algorithm
 
-# In[1]:
+# In[19]:
 
 '''
 from IPython.display import display, Javascript
@@ -36,9 +36,9 @@ def adjacency_list(FStar):
         A[i] = FStar[:,1][np.argwhere(FStar[:,0]==i)].reshape(-1,).tolist()
     return A
 
-def FIFOlc(FStar, s, d=None):
+def FIFO_ShortestPath(FStar, s, d=None):
     '''
-    FIFO label correcting algorithm
+    FIFO Shortest Path Algorithm
     '''
     A = adjacency_list(FStar)
     n = len(A)
@@ -47,15 +47,15 @@ def FIFOlc(FStar, s, d=None):
         d = np.ndarray((n+1,))
         d[:] = np.inf
         d[s] = 0
-    pred = np.zeros(n+1, dtype=int)
-    pred[s] = 0
+    parent = np.zeros(n+1, dtype=int)
+    parent[s] = 0
     while len(NODELIST) != 0:
         i = NODELIST.pop(0) #Removes the first element
         for j in A[i]:
             c = FStar[np.all(FStar[:,0:2]==[i,j], axis=1),2]
             if d[j] > d[i] + c:
                 d[j] = d[i] + c
-                pred[j] = i
+                parent[j] = i
                 if j not in NODELIST:
                     NODELIST.append(j)
         # Drawing each pass
@@ -64,6 +64,7 @@ def FIFOlc(FStar, s, d=None):
         G.add_weighted_edges_from([(1,2, 3),(1,3, 2),(2,3,2),(2,4,2),(2,5,4),(3,4,5),(4,6,3),(5,4,2),(5,6,2)])
         shells=[[6,5,2,1,3,4]]
         pos = nx.shell_layout(G, shells)
+        plt.title(str(NODELIST))
         nx.draw(G,pos=pos, with_labels=False, font_weight='bold', node_size=2000)
         labels = nx.get_edge_attributes(G,'weight')
         nx.draw_networkx_edge_labels(G,pos=pos,edge_labels=labels)
@@ -72,7 +73,7 @@ def FIFOlc(FStar, s, d=None):
         #    pos[p][1] += offset
         nx.draw_networkx_labels(G, pos, labels={l:"%d, %s"%(l,d[l]) for l in range(1,7)})
         plt.show()
-    return pred, d
+    return parent, d
 
 # Forward star representation [T, H, C, U]
 # [0, 0, 0] is a dummy node.
@@ -97,7 +98,7 @@ labels = nx.get_edge_attributes(G,'weight')
 nx.draw_networkx_edge_labels(G,pos=pos,edge_labels=labels)
 plt.show()
 
-pred, d = FIFOlc(FStar, 1)
+parent, d = FIFO_ShortestPath(FStar, 1)
 
 #Draw the shortest path tree
 G = nx.DiGraph()
@@ -105,6 +106,7 @@ G.add_nodes_from([1,2,3,4,5,6])
 G.add_weighted_edges_from([(1,2, 3),(1,3, 2),(2,4,2),(2,5,4),(4,6,3)])
 shells=[[6,5,2,1,3,4]]
 pos = nx.shell_layout(G, shells)
+plt.title("Parent = " + str(parent[1:]) + " , Distance, d = " + str(d[1:]))
 nx.draw(G,pos=pos, with_labels=False, font_weight='bold', node_size=2000)
 labels = nx.get_edge_attributes(G,'weight')
 nx.draw_networkx_edge_labels(G,pos=pos,edge_labels=labels)
